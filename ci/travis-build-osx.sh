@@ -6,7 +6,7 @@
 
 # bailout on errors and echo commands
 set -xe
-brew update
+# brew update
 brew install cairo libexif xz
 export MACOSX_DEPLOYMENT_TARGET=10.9
 # We need to build own libarchive
