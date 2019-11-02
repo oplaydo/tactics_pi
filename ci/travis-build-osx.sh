@@ -7,7 +7,8 @@
 # bailout on errors and echo commands
 set -xe
 # brew update
-brew install cairo libexif xz
+HOMEBREW_NO_AUTO_UPDATE=1 brew install cairo libexif xz
+# brew install cairo libexif xz
 export MACOSX_DEPLOYMENT_TARGET=10.9
 # We need to build own libarchive
 wget https://libarchive.org/downloads/libarchive-3.3.3.tar.gz
