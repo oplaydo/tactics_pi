@@ -43,6 +43,7 @@ wget -q http://opencpn.navnux.org/build_deps/Packages.dmg
 hdiutil attach Packages.dmg
 sudo installer -pkg "/Volumes/Packages 1.2.5/Install Packages.pkg" -target "/"
 make install
+make create-dmg
 make create-pkg
 
 ls -l *.pkg *.tar.gz *.xml
