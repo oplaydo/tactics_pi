@@ -48,7 +48,8 @@
 //wx2.9 #include <wx/wrapsizer.h>
 
 #include "ocpn_plugin.h"
-#include "nmea0183/nmea0183.h"
+//#include "nmea0183/nmea0183.h"
+#include "nmea0183.h"
 #include "instrument.h"
 #include "speedometer.h"
 #include "compass.h"
@@ -119,7 +120,7 @@ WX_DEFINE_ARRAY(TacticsInstrumentContainer *, wxArrayOfInstrument);
 //----------------------------------------------------------------------------------------------------------
 
 
-class tactics_pi : public wxTimer, opencpn_plugin_116
+class tactics_pi : public wxTimer, opencpn_plugin_117
 {
 public:
       tactics_pi(void *ppimgr);
@@ -135,10 +136,15 @@ public:
       int GetAPIVersionMinor();
       int GetPlugInVersionMajor();
       int GetPlugInVersionMinor();
+      int GetPlugInVersionPatch();
+      int GetPlugInVersionPost();
+	  
       wxBitmap *GetPlugInBitmap();
       wxString GetCommonName();
       wxString GetShortDescription();
       wxString GetLongDescription();
+	  // from shipdriver to read listing panel bitmap png
+	  wxBitmap m_panelBitmap; 
 
 //    The optional method overrides
       void SetNMEASentence(wxString &sentence);

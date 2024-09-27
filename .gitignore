@@ -1,2 +1,9 @@
-build/
-src/version.h
+cmake-build*
+build/*
+.idea*
+.directory
+po/POTFILES.in.test
+temp
+tmp
+master.zip
+cache

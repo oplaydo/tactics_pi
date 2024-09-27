@@ -12,7 +12,7 @@ if(OCPN_FLATPAK_CONFIG)
     # On a flatpak build lib libraries such as LibGL and wxWidgets are only available in the flatpak sandbox. Thus, building flatpak must be done before attempts to locate these non-existing libraries in the host i. e., before any FindLibrary(), FindWxWidgets(), etc.
     find_program(TAR NAMES gtar tar)
     if(NOT TAR)
-        message(FATAL_ERROR "tar not found, required for OCPN_FLATPAK")
+        message(FATAL_ERROR "${CMLOC}tar not found, required for OCPN_FLATPAK")
     endif()
     add_custom_target(
         flatpak-build ALL
@@ -22,9 +22,10 @@ if(OCPN_FLATPAK_CONFIG)
     add_custom_target("flatpak-pkg")
     add_custom_command(
         TARGET flatpak-pkg
-        COMMAND ${TAR} -czf ${PKG_NVR}-${ARCH}_${PKG_TARGET_NVR}.tar.gz --transform 's|.*/files/|${PACKAGE}-flatpak-${PACKAGE_VERSION}/|' ${CMAKE_CURRENT_BINARY_DIR}/app/files
+        COMMAND ${TAR} -czf ${PKG_NVR}-${ARCH}${PKG_TARGET_WX_VER}_${PKG_TARGET_NVR}.tar.gz --verbose --transform 's|.*/files/|${PACKAGE}-flatpak-${PACKAGE_VERSION}/|' ${CMAKE_CURRENT_BINARY_DIR}/app/files
         COMMAND chmod -R a+wr ../build)
 
+        message(STATUS "${CMLOC}Zip file name: ${PKG_NVR}-${ARCH}${PKG_TARGET_WX_VER}_${PKG_TARGET_NVR}.tar.gz")
     set(CMLOC ${SAVE_CMLOC})
     return()
 endif(OCPN_FLATPAK_CONFIG)
@@ -48,7 +49,7 @@ if(WIN32)
     set(CPACK_NSIS_PACKAGE_NAME "${PACKAGE_NAME}")
 
     # Let cmake find NSIS.template.in
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildwin")
+    list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildwin")
 
     # These lines set the name of the Windows Start Menu shortcut and the icon that goes with it
     set(CPACK_NSIS_DISPLAY_NAME "OpenCPN ${PACKAGE_NAME}")
@@ -65,10 +66,10 @@ else(WIN32)
 endif(WIN32)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CPACK_STRIP_FILES "")
+    set(CPACK_STRIP_FILES FALSE)
     message(STATUS "${CMLOC}Not stripping debug information from module")
 else(CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-    set(CPACK_STRIP_FILES "${PACKAGE_NAME}")
+    set(CPACK_STRIP_FILES TRUE)
     message(STATUS "${CMLOC}Stripping debug information from module")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
@@ -88,8 +89,13 @@ set(CPACK_SOURCE_IGNORE_FILES "^${CMAKE_CURRENT_SOURCE_DIR}/.git/*" "^${CMAKE_CU
 if(UNIX AND NOT APPLE)
 
     # need apt-get install rpm, for rpmbuild
-    set(PACKAGE_DEPS "opencpn, bzip2, gzip")
-    set(CPACK_GENERATOR "DEB;TGZ")
+    set(PACKAGE_DEPS "${PACKAGE_DEPS},opencpn, bzip2, gzip")
+    message(STATUS "${CMLOC}PACKAGE_DEPS: ${PACKAGE_DEPS}")
+    if(NOT QT_ANDROID)
+        set(CPACK_GENERATOR "DEB;TGZ")
+    else()
+        set(CPACK_GENERATOR "TGZ")
+    endif()
 
     set(CPACK_DEBIAN_PACKAGE_NAME ${PACKAGING_NAME})
     set(CPACK_DEBIAN_PACKAGE_DEPENDS ${PACKAGE_DEPS})
@@ -105,8 +111,11 @@ if(UNIX AND NOT APPLE)
 
 endif(UNIX AND NOT APPLE)
 
+
 if(NOT STANDALONE MATCHES "BUNDLED")
-    if(APPLE)
+    # MacOS .pkg installer is deprecated in OCPN 5.6.2+
+    #if(APPLE)
+    if(FALSE)
         message(STATUS "${CMLOC}*** Staging to build PlugIn OSX Package ***")
 
         # Copy a bunch of files so the Packages installer builder can find them relative to ${CMAKE_CURRENT_BINARY_DIR} This avoids absolute paths in the chartdldr_pi.pkgproj file
@@ -131,9 +140,9 @@ if(NOT STANDALONE MATCHES "BUNDLED")
             COMMENT "create-pkg: Done."
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${VERBOSE_NAME}-Plugin_${PACKAGE_VERSION}_${OCPN_MIN_VERSION}.pkg)
 
-        set(CPACK_GENERATOR "TGZ")
-    endif(APPLE)
+	endif(FALSE)
 
+    set(CPACK_GENERATOR "TGZ")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_NAME} PlugIn for OpenCPN")
     set(CPACK_PACKAGE_DESCRIPTION "${PACKAGE_NAME} PlugIn for OpenCPN")
     set(CPACK_PACKAGE_FILE_NAME "${PACKAGING_NAME_XML}")
@@ -158,7 +167,7 @@ if(NOT STANDALONE MATCHES "BUNDLED")
 
 
     set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/PluginCPackOptions.cmake")
-    message(STATUS "${CMLOC}CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}, CPACK_PROJECT_CONFIG_FILE: ${CPACK_PROJECT_CONFIG_FILE}")
+    message(STATUS "${CMLOC}PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}, CPACK_PROJECT_CONFIG_FILE: ${CPACK_PROJECT_CONFIG_FILE}")
 
     include(CPack)
 
